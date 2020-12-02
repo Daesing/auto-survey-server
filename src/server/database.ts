@@ -1,5 +1,5 @@
 import mysql, { Connection, ConnectionConfig } from 'mysql';
-import { EduroSurveyApi } from '../eduroapi';
+import { EduroSurveyApi, SurveyUser } from '../eduroapi';
 import * as timeutil from '../util/timeutil';
 
 
@@ -46,6 +46,7 @@ export class DatabaseConnector {
         this.connection.query('CREATE DATABASE IF NOT EXISTS `auto_survey`');
         this.connection.query(
             'CREATE TABLE IF NOT EXISTS `auto_survey`.`students_info` (' +
+                '`id` INT AUTO_INCREMENT PRIMARY KEY,' +
                 '`birthday` VARCHAR(6) NOT NULL,' +
                 '`name` VARCHAR(32) NOT NULL,' +
                 '`province` VARCHAR(32) NOT NULL,' +
@@ -95,19 +96,32 @@ export class DatabaseConnector {
         return new Promise<void>(async (res, rej) => {
 
             let school = await EduroSurveyApi.searchSchool(credentials.province, credentials.school_type, credentials.school);
-            if(!school) rej('No such school exists.');
 
-            let user = await EduroSurveyApi.findUser({
-                birthday: credentials.birthday,
-                loginType: 'school',
-                name: credentials.name,
-                orgCode: school.schulList[0].orgCode,
-                stdntPNo: null
-            })
-            if(!user) rej('No such survey user exists.')
+            if(school.schulList.length == 0) {
+                rej('검색결과에 맞는 학교 정보가 없습니다.');
+                return;
+            }
+
+            let user : SurveyUser;
+
+            try {
+                user = await EduroSurveyApi.findUser({
+                    birthday: credentials.birthday,
+                    loginType: 'school',
+                    name: credentials.name,
+                    orgCode: school.schulList[0].orgCode,
+                    stdntPNo: null
+                })
+                if(!user) {
+                    throw '';
+                    return;
+                }
+            } catch(e) {
+                rej('검색 결과에 맞는 참여자 정보가 없습니다.')
+            }
 
             this.connection.query(
-                'INSERT INTO `auto_survey`.`students_info` VALUES(?,?,?,?,?,?)',
+                'INSERT INTO `auto_survey`.`students_info`(birthday, name, province, school_type, school, survey_time) VALUES(?,?,?,?,?,?)',
                 [
                     credentials.birthday,
                     credentials.name,
