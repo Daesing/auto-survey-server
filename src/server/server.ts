@@ -16,13 +16,19 @@ export class AutoSurveyServer {
 
 
     constructor(dbfile: string) {
+
+        process.stdout.write('Reading database configuration file... ');
         let db_data = jsonreader.readSync(dbfile);
+        console.log('✔');
+        
+        process.stdout.write('Establishing database connector... ');
         this.database = new DatabaseConnector({
             host: db_data['host'],
             user: db_data['user'],
             password: db_data['password'],
-        })
-        
+        });
+        console.log('✔');
+
         this.repeater = new MinuteRepeater(date => {
             this.doSurveys(date)
         });
@@ -47,24 +53,38 @@ export class AutoSurveyServer {
         let pinfo = await participant.getParticipantInfo();
         await pinfo.doSurvey();
 
-        if(schools.length == 0) throw '학교 검색결과가 없습니다.';
     }
 
 
 
     async doSurveys(date: Date) {
+        process.stdout.write(`checking time id ${timeutil.timeTo4digit(date)}... `);
+
         let credentials = await this.database.getUsers(date);
 
         for(let credential of credentials) {
             await this.doUserSurvey(credential);
         }
+
+        if(credentials.length != 0) {
+            console.log(`✔ (${credentials.length} result(s))`);
+        }
+        else {
+            console.log(`✔ (no results)`);
+        }
+
+        this.database.setLastCheckedTime(date);
     }
 
 
     async start() : Promise<AutoSurveyServer> {
+        process.stdout.write('Setting up the database... ');
         await this.database.setup();
+        console.log('✔');
         
+        process.stdout.write('Starting up repeater... ');
         this.repeater.start();
+        console.log('✔');
         return this;
     }
 }
