@@ -1,0 +1,21 @@
+{
+  "name": "auto-survey-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm install && npm install -g typescript && npx tsc",
+    "do-survey": "node index.js",
+    "do-survey-ts": "npx ts-node index.ts"
+  },
+  "author": "tf2_mandeokyi",
+  "license": "ISC",
+  "dependencies": {
+    "@types/mysql": "^2.15.15",
+    "@types/node": "^14.14.10",
+    "@types/node-fetch": "^2.5.7",
+    "jsencrypt": "^3.0.0-rc.1",
+    "mysql": "^2.18.1",
+    "node-fetch": "^2.6.1"
+  }
+}
