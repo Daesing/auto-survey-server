@@ -114,10 +114,10 @@ export class DatabaseConnector {
                 })
                 if(!user) {
                     throw '';
-                    return;
                 }
             } catch(e) {
                 rej('검색 결과에 맞는 참여자 정보가 없습니다.')
+                return;
             }
 
             this.connection.query(
