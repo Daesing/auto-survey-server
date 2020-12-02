@@ -16,7 +16,6 @@ export class MinuteRepeater {
     }
 
     async start() {
-        this.checkncall();
         return setInterval(() => {
             this.checkncall();
         }, 30000);
