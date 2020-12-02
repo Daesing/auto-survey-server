@@ -2,6 +2,7 @@ import { DatabaseConnector, SurveyUserCredentials } from "./database";
 import * as jsonreader from '../util/jsonreader';
 import { MinuteRepeater } from "../util/minuterepeater";
 import { EduroSurveyApi } from "../eduroapi";
+import * as timeutil from '../util/timeutil'
 
 
 

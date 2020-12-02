@@ -1,4 +1,4 @@
-import * as dateutil from './dateutil';
+import * as timeutil from './timeutil';
 
 export class MinuteRepeater {
     private call : (date: Date) => void;
@@ -9,9 +9,9 @@ export class MinuteRepeater {
     }
 
     private checkncall(date: Date = new Date()) {
-        if(this.lastCall ? (dateutil.date24digit(date) !== this.lastCall) : true) {
+        if(this.lastCall ? (timeutil.timeTo4digit(date) !== this.lastCall) : true) {
             this.call(date);
-            this.lastCall = dateutil.date24digit(date);
+            this.lastCall = timeutil.timeTo4digit(date);
         }
     }
 

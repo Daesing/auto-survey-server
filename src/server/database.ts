@@ -1,6 +1,6 @@
 import mysql, { Connection, ConnectionConfig } from 'mysql';
 import { EduroSurveyApi } from '../eduroapi';
-import * as dateutil from '../util/dateutil';
+import * as timeutil from '../util/timeutil';
 
 
 
