@@ -68,7 +68,6 @@ export class DatabaseConnector {
     async getUsers(date: Date = new Date()) : Promise<SurveyUserCredentials[]> {
         return new Promise<SurveyUserCredentials[]>((res, rej) => {
             let date_digit = dateutil.date24digit(date);
-            console.log(date_digit);
             this.connection.query(
                 'SELECT * FROM `auto_survey`.`students_info` WHERE `survey_time`=?',
                 [date_digit],

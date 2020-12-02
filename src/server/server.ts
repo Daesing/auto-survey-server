@@ -23,7 +23,6 @@ export class AutoSurveyServer {
         })
         
         this.repeater = new MinuteRepeater(date => {
-            console.log(date);
             this.doSurveys(date)
         });
     }
@@ -65,7 +64,6 @@ export class AutoSurveyServer {
         await this.database.setup();
         
         this.repeater.start();
-        console.log(await this.database.getLastCheckedTime());
         return this;
     }
 }
