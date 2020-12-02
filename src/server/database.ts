@@ -53,6 +53,12 @@ export class DatabaseConnector {
                 '`school` VARCHAR(32) NOT NULL,' +
                 '`survey_time` VARCHAR(4) NOT NULL' +
             `) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;`
+        );
+        this.connection.query(
+            'CREATE TABLE IF NOT EXISTS `auto_survey`.`variables` (' +
+                '`key` VARCHAR(32) NOT NULL PRIMARY KEY,' +
+                '`value` VARCHAR(32) NOT NULL' +
+            `) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;`
         )
     }
 
@@ -66,11 +72,15 @@ export class DatabaseConnector {
 
 
     async getUsers(date: Date = new Date()) : Promise<SurveyUserCredentials[]> {
-        return new Promise<SurveyUserCredentials[]>((res, rej) => {
-            let date_digit = dateutil.date24digit(date);
+        return new Promise<SurveyUserCredentials[]>(async (res, rej) => {
+            
+            let date_digit = timeutil.timeTo4digit(date);
+            let lastchecktime = await this.getLastCheckedTime();
+
             this.connection.query(
-                'SELECT * FROM `auto_survey`.`students_info` WHERE `survey_time`=?',
-                [date_digit],
+                'SELECT * FROM `auto_survey`.`students_info` WHERE ' +
+                    '? < `survey_time` AND `survey_time` <= ?',
+                [lastchecktime, date_digit],
                 (error, result) => {
                     if(error) rej(error);
                     res(result);
@@ -119,10 +129,10 @@ export class DatabaseConnector {
     async getLastCheckedTime() : Promise<string> {
         return new Promise<string>((res, rej) => {
             this.connection.query(
-                'SELECT @autosurvey_lastchecked',
+                'SELECT `value` FROM `auto_survey`.`variables` WHERE `key`="lastchecktime"',
                 (error, result) => {
                     if(error) rej(error)
-                    res(result[0]['@autosurvey_lastchecked']);
+                    res(!result ? null : result[0]['value']);
                 }
             )
         })
@@ -130,10 +140,13 @@ export class DatabaseConnector {
 
 
     
-    async setLastCheckedTime(time: string) : Promise<void> {
+    async setLastCheckedTime(time: Date | string) : Promise<void> {
         return new Promise<void>((res, rej) => {
+            let result = typeof time === 'string' ? time : timeutil.timeTo4digit(time);
+
             this.connection.query(
-                'SET @autosurvey_lastchecked=?', [time],
+                'INSERT INTO `auto_survey`.`variables` values("lastchecktime", ?) ' +
+                    'on duplicate key update `value`=?', [result, result],
                 error => {
                     if(error) rej(error)
                     res();
