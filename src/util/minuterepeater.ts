@@ -9,7 +9,7 @@ export class MinuteRepeater {
     }
 
     private checkncall(date: Date = new Date()) {
-        if(this.lastCall ? (timeutil.timeTo4digit(date) !== this.lastCall) : true) {
+        if(timeutil.timeTo4digit(date) !== this.lastCall) {
             this.call(date);
             this.lastCall = timeutil.timeTo4digit(date);
         }
