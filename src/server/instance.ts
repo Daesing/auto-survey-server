@@ -1,8 +1,8 @@
 import { DatabaseConnector, SurveyUserCredentials } from "./database";
-import * as jsonreader from '../util/jsonreader';
 import { MinuteRepeater } from "../util/minuterepeater";
 import { EduroSurveyApi } from "../eduroapi";
 import * as timeutil from '../util/timeutil'
+import { ConnectionConfig } from "mysql";
 
 
 
@@ -15,18 +15,10 @@ export class AutoSurveyServer {
 
 
 
-    constructor(dbfile: string) {
-
-        process.stdout.write('Reading database configuration file... ');
-        let db_data = jsonreader.readSync(dbfile);
-        console.log('✔');
+    constructor(dbconfig : ConnectionConfig) {
         
         process.stdout.write('Establishing database connector... ');
-        this.database = new DatabaseConnector({
-            host: db_data['host'],
-            user: db_data['user'],
-            password: db_data['password'],
-        });
+        this.database = new DatabaseConnector(dbconfig);
         console.log('✔');
 
         this.repeater = new MinuteRepeater(date => {

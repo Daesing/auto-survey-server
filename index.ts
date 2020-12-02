@@ -1,4 +1,9 @@
 import { AutoSurveyServer } from './src/server/instance';
+import * as jsonreader from './src/util/jsonreader';
 
-new AutoSurveyServer('db_settings.json').start();
+process.stdout.write('Reading settings file... ');
+let settings = jsonreader.readSync('./settings.json');
+console.log('✔');
+
+new AutoSurveyServer(settings['database']).start();
 
