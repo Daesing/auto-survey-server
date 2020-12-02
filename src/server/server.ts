@@ -9,14 +9,14 @@ export class AutoSurveyServer {
 
 
 
-    private dbc : DatabaseConnector;
+    public database : DatabaseConnector;
     private repeater : MinuteRepeater;
 
 
 
     constructor(dbfile: string) {
         let db_data = jsonreader.readSync(dbfile);
-        this.dbc = new DatabaseConnector({
+        this.database = new DatabaseConnector({
             host: db_data['host'],
             user: db_data['user'],
             password: db_data['password'],
@@ -31,16 +31,8 @@ export class AutoSurveyServer {
 
 
     async doUserSurvey(credentials: SurveyUserCredentials) {
-        console.log('로그인 정보: {\n' + 
-            `    생일: ${credentials.birthday},\n` + 
-            `    이름: ${credentials.name},\n\n` + 
 
-            `    행정 구역: ${credentials.province},\n` + 
-            `    학교급: ${credentials.schoolType},\n` + 
-            `    학교: ${credentials.school},\n` + 
-        '}\n');
-
-        let schools = (await EduroSurveyApi.searchSchool(credentials.province, credentials.schoolType, credentials.school)).schulList;
+        let schools = (await EduroSurveyApi.searchSchool(credentials.province, credentials.school_type, credentials.school)).schulList;
         
         let user = await EduroSurveyApi.findUser({
             birthday: credentials.birthday,
@@ -61,7 +53,7 @@ export class AutoSurveyServer {
 
 
     async doSurveys(date: Date) {
-        let credentials = await this.dbc.getUsers(date);
+        let credentials = await this.database.getUsers(date);
 
         for(let credential of credentials) {
             await this.doUserSurvey(credential);
@@ -69,10 +61,11 @@ export class AutoSurveyServer {
     }
 
 
-
-    async start() {
-        await this.dbc.connect();
-        await this.dbc.setupDatabase();
+    async start() : Promise<AutoSurveyServer> {
+        await this.database.setup();
+        
         this.repeater.start();
+        console.log(await this.database.getLastCheckedTime());
+        return this;
     }
 }
